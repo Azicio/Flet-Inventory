@@ -8,4 +8,4 @@ def main(page: ft.Page):
         ft.Text("Lead Operator: Azicio | Environment: Codespaces", size=14),
     )
 
-ft.run(target=main, view=ft.AppView.WEB_BROWSER)
+ft.run(main, view=ft.AppView.WEB_BROWSER)
