@@ -5,7 +5,7 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT
     page.add(
         ft.Text("🏗️ Flet Engine Initialized", size=24, weight=ft.FontWeight.BOLD),
-        ft.Text("Lead Operator: Azicio | Environment: Pydroid 3", size=14),
+        ft.Text("Lead Operator: Azicio | Environment: Codespaces", size=14),
     )
 
-ft.app(target=main, view=ft.WEB_BROWSER)
+ft.run(target=main, view=ft.AppView.WEB_BROWSER)
