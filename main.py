@@ -4,7 +4,7 @@ import json
 import os
 
 # --- GATEWAY KONFIGURASI WEBHOOK & FILE CORE ---
-WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwk1jWYyo7Lz2fXkh2QQcfLQB__X2BbRoB4wUzIQTgO6KTLeGd-xsHPp9n0rc-Zt-RG/exec"
+WEBHOOK_URL = "YOUR_DEPLOYMENT_URL_HERE"
 CONFIG_PATH = "data/inventory_config.json"
 
 def load_ui_configuration():
@@ -19,13 +19,6 @@ def load_ui_configuration():
         "items_registry": {}
     }
 
-def icon(name):
-    """Return the Material icon with the given name, or a safe fallback if missing."""
-    try:
-        return getattr(ft.icons, name)
-    except AttributeError:
-        return ft.icons.CIRCLE   # harmless generic icon
-
 def main(page: ft.Page):
     page.title = "Terminal Kontrol Inventaris Otomatis"
     page.theme_mode = ft.ThemeMode.LIGHT
@@ -35,41 +28,28 @@ def main(page: ft.Page):
     config_fuel = load_ui_configuration()
     items_db = config_fuel.get("items_registry", {})
 
-    # --- ELEMEN INPUT ANTARMUKA ---
+    # --- ELEMEN INPUT ANTARMUKA (tanpa ikon) ---
     st_title = ft.Text("📦 Terminal Transaksi Stok Barang", size=24, weight=ft.FontWeight.BOLD, color="#1F4E79")
     st_caption = ft.Text("Auto-Lookup Registry Engine Operational", size=12, italic=True)
     
-    # Dropdowns (menggunakan ikon yang aman)
     category_dropdown = ft.Dropdown(
         label="Klasifikasi Kategori Barang",
-        options=[ft.dropdown.Option(cat) for cat in config_fuel["categories"]],
-        prefix_icon=icon("LIST_ALT")   # atau "LIST" jika versi Flet lebih baru, tapi kita pakai wrapper
+        options=[ft.dropdown.Option(cat) for cat in config_fuel["categories"]]
     )
     type_dropdown = ft.Dropdown(
         label="Jenis Protokol Transaksi",
-        options=[ft.dropdown.Option(t_type) for t_type in config_fuel["transaction_types"]],
-        prefix_icon=icon("SWAP_HORIZONTAL_CIRCLE")
+        options=[ft.dropdown.Option(t_type) for t_type in config_fuel["transaction_types"]]
     )
     operator_dropdown = ft.Dropdown(
         label="Operator Penanggung Jawab",
-        options=[ft.dropdown.Option(op) for op in config_fuel["operators"]],
-        prefix_icon=icon("PERSON")
+        options=[ft.dropdown.Option(op) for op in config_fuel["operators"]]
     )
 
-    name_field = ft.TextField(
-        label="Nama Barang / Nomenclature Item",
-        prefix_icon=icon("WORK")
-    )
-    qty_field = ft.TextField(
-        label="Jumlah Unit / Quantity",
-        value="1",
-        prefix_icon=icon("EXPOSURE_PLUS_1")
-    )
+    name_field = ft.TextField(label="Nama Barang / Nomenclature Item")
+    qty_field = ft.TextField(label="Jumlah Unit / Quantity", value="1")
 
-    # Serial field
     serial_field = ft.TextField(
         label="Nomor Seri / Serial Number (Scan Barcode)",
-        prefix_icon=icon("SEARCH"),
         hint_text="Scan kode komponen...",
     )
 
@@ -146,7 +126,6 @@ def main(page: ft.Page):
 
     submit_action_btn = ft.ElevatedButton(
         text="Kirim Data Transaksi ke Google Sheets",
-        icon=icon("CLOUD_UPLOAD"),
         style=ft.ButtonStyle(
             color=ft.colors.WHITE,
             bgcolor="#1F4E79",
