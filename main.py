@@ -127,7 +127,7 @@ def main(page: ft.Page):
     submit_action_btn = ft.ElevatedButton(
         text="Kirim Data Transaksi ke Google Sheets",
         style=ft.ButtonStyle(
-            color=ft.colors.WHITE,
+            color=ft.Colors.WHITE,
             bgcolor="#1F4E79",
             shape=ft.RoundedRectangleBorder(radius=6)
         ),
