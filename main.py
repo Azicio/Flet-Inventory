@@ -19,6 +19,13 @@ def load_ui_configuration():
         "items_registry": {}
     }
 
+def icon(name):
+    """Return the Material icon with the given name, or a safe fallback if missing."""
+    try:
+        return getattr(ft.icons, name)
+    except AttributeError:
+        return ft.icons.CIRCLE   # harmless generic icon
+
 def main(page: ft.Page):
     page.title = "Terminal Kontrol Inventaris Otomatis"
     page.theme_mode = ft.ThemeMode.LIGHT
@@ -32,31 +39,38 @@ def main(page: ft.Page):
     st_title = ft.Text("📦 Terminal Transaksi Stok Barang", size=24, weight=ft.FontWeight.BOLD, color="#1F4E79")
     st_caption = ft.Text("Auto-Lookup Registry Engine Operational", size=12, italic=True)
     
-    # Dropdowns
+    # Dropdowns (menggunakan ikon yang aman)
     category_dropdown = ft.Dropdown(
         label="Klasifikasi Kategori Barang",
         options=[ft.dropdown.Option(cat) for cat in config_fuel["categories"]],
-        prefix_icon=ft.icons.LIST    # safe, always available
+        prefix_icon=icon("LIST_ALT")   # atau "LIST" jika versi Flet lebih baru, tapi kita pakai wrapper
     )
     type_dropdown = ft.Dropdown(
         label="Jenis Protokol Transaksi",
         options=[ft.dropdown.Option(t_type) for t_type in config_fuel["transaction_types"]],
-        prefix_icon=ft.icons.SWAP_HORIZONTAL_CIRCLE   # safe alternative to SWAP_HORIZ
+        prefix_icon=icon("SWAP_HORIZONTAL_CIRCLE")
     )
     operator_dropdown = ft.Dropdown(
         label="Operator Penanggung Jawab",
         options=[ft.dropdown.Option(op) for op in config_fuel["operators"]],
-        prefix_icon=ft.icons.PERSON   # safe, very old
+        prefix_icon=icon("PERSON")
     )
 
     name_field = ft.TextField(
         label="Nama Barang / Nomenclature Item",
-        prefix_icon=ft.icons.WORK   # reliable, represents manufacturing
+        prefix_icon=icon("WORK")
     )
     qty_field = ft.TextField(
         label="Jumlah Unit / Quantity",
         value="1",
-        prefix_icon=ft.icons.EXPOSURE_PLUS_1   # plus/minus style
+        prefix_icon=icon("EXPOSURE_PLUS_1")
+    )
+
+    # Serial field
+    serial_field = ft.TextField(
+        label="Nomor Seri / Serial Number (Scan Barcode)",
+        prefix_icon=icon("SEARCH"),
+        hint_text="Scan kode komponen...",
     )
 
     # --- INTELLIGENT AUTO-LOOKUP LOGIC ---
@@ -79,13 +93,7 @@ def main(page: ft.Page):
             category_dropdown.disabled = False
         page.update()
 
-    # Serial field dengan ikon aman
-    serial_field = ft.TextField(
-        label="Nomor Seri / Serial Number (Scan Barcode)",
-        prefix_icon=ft.icons.SEARCH,   # universal, won't break
-        hint_text="Scan kode komponen...",
-        on_change=check_barcode_registry
-    )
+    serial_field.on_change = check_barcode_registry
 
     # --- TRANSMIT ACTION MATRIX ---
     def transmit_form_payload(e):
@@ -138,7 +146,7 @@ def main(page: ft.Page):
 
     submit_action_btn = ft.ElevatedButton(
         text="Kirim Data Transaksi ke Google Sheets",
-        icon=ft.icons.CLOUD_UPLOAD,   # usually safe, but fallback to UPLOAD if needed
+        icon=icon("CLOUD_UPLOAD"),
         style=ft.ButtonStyle(
             color=ft.colors.WHITE,
             bgcolor="#1F4E79",
