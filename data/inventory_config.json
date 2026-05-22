@@ -1,0 +1,22 @@
+{
+    "categories": [
+        "Suku Cadang Alat Berat (Heavy Machinery Parts)",
+        "Depot Alat & Perkakas (Tools Depot)",
+        "Cairan & Pelumas (Lubricants & Fluids)",
+        "Alat Pelindung Diri (Safety PPE)",
+        "Logistik Material Lapangan"
+    ],
+    "transaction_types": [
+        "STOCK_INFLOW (Barang Masuk/Restock)",
+        "STOCK_OUTFLOW (Barang Keluar/Dispatch)",
+        "ALOKASI_MAINTENANCE (Perbaikan Unit)",
+        "PENYESUAIAN_AUDIT (Opname Stok)"
+    ],
+    "operators": [
+        "Azicio (Developer)",
+        "Father (Welder)",
+        "Kaka Rino (Operator Crusher)",
+        "Pak Bahar (Kepala Peralatan)",
+        "Tim Auditor Manajemen"
+    ]
+}
