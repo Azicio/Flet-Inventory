@@ -4,7 +4,7 @@ import json
 import os
 
 # --- GATEWAY KONFIGURASI WEBHOOK & FILE CORE ---
-WEBHOOK_URL = "YOUR_DEPLOYMENT_URL_HERE"
+WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwk1jWYyo7Lz2fXkh2QQcfLQB__X2BbRoB4wUzIQTgO6KTLeGd-xsHPp9n0rc-Zt-RG/exec"
 CONFIG_PATH = "data/inventory_config.json"
 
 def load_ui_configuration():
