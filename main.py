@@ -32,32 +32,31 @@ def main(page: ft.Page):
     st_title = ft.Text("📦 Terminal Transaksi Stok Barang", size=24, weight=ft.FontWeight.BOLD, color="#1F4E79")
     st_caption = ft.Text("Auto-Lookup Registry Engine Operational", size=12, italic=True)
     
-    # Dropdowns (dibuat lebih dulu agar bisa dipakai di callback)
+    # Dropdowns
     category_dropdown = ft.Dropdown(
         label="Klasifikasi Kategori Barang",
         options=[ft.dropdown.Option(cat) for cat in config_fuel["categories"]],
-        prefix_icon=ft.icons.CATEGORY
+        prefix_icon=ft.icons.LIST    # safe, always available
     )
     type_dropdown = ft.Dropdown(
         label="Jenis Protokol Transaksi",
         options=[ft.dropdown.Option(t_type) for t_type in config_fuel["transaction_types"]],
-        prefix_icon=ft.icons.SWAP_HORIZ
+        prefix_icon=ft.icons.SWAP_HORIZONTAL_CIRCLE   # safe alternative to SWAP_HORIZ
     )
     operator_dropdown = ft.Dropdown(
         label="Operator Penanggung Jawab",
         options=[ft.dropdown.Option(op) for op in config_fuel["operators"]],
-        prefix_icon=ft.icons.PERSON
+        prefix_icon=ft.icons.PERSON   # safe, very old
     )
 
-    # Field yang akan diisi otomatis oleh lookup
     name_field = ft.TextField(
         label="Nama Barang / Nomenclature Item",
-        prefix_icon=ft.icons.MANUFACTURER   # aman & tersedia di semua versi Flet
+        prefix_icon=ft.icons.WORK   # reliable, represents manufacturing
     )
     qty_field = ft.TextField(
         label="Jumlah Unit / Quantity",
         value="1",
-        prefix_icon=ft.icons.UNFOLD_MORE
+        prefix_icon=ft.icons.EXPOSURE_PLUS_1   # plus/minus style
     )
 
     # --- INTELLIGENT AUTO-LOOKUP LOGIC ---
@@ -80,10 +79,10 @@ def main(page: ft.Page):
             category_dropdown.disabled = False
         page.update()
 
-    # Serial field didefinisikan setelah callback-nya (urutan aman)
+    # Serial field dengan ikon aman
     serial_field = ft.TextField(
         label="Nomor Seri / Serial Number (Scan Barcode)",
-        prefix_icon=ft.icons.BARCODE,
+        prefix_icon=ft.icons.SEARCH,   # universal, won't break
         hint_text="Scan kode komponen...",
         on_change=check_barcode_registry
     )
@@ -108,7 +107,7 @@ def main(page: ft.Page):
             "operator": str(operator_dropdown.value)
         }
 
-        # Reset form & buka kunci field
+        # Reset form
         serial_field.value = ""
         name_field.value = ""
         qty_field.value = "1"
@@ -139,7 +138,7 @@ def main(page: ft.Page):
 
     submit_action_btn = ft.ElevatedButton(
         text="Kirim Data Transaksi ke Google Sheets",
-        icon=ft.icons.CLOUD_UPLOAD,
+        icon=ft.icons.CLOUD_UPLOAD,   # usually safe, but fallback to UPLOAD if needed
         style=ft.ButtonStyle(
             color=ft.colors.WHITE,
             bgcolor="#1F4E79",
