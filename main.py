@@ -1,4 +1,4 @@
-import flet as ft
+import streamlit as st
 import requests
 import json
 import os
@@ -19,141 +19,90 @@ def load_ui_configuration():
         "items_registry": {}
     }
 
-def main(page: ft.Page):
-    page.title = "Terminal Kontrol Inventaris Otomatis"
-    page.theme_mode = ft.ThemeMode.LIGHT
-    page.scroll = ft.ScrollMode.ADAPTIVE
-    page.theme = ft.Theme(color_scheme_seed="#1F4E79")
+st.set_page_config(page_title="Terminal Kontrol Inventaris", page_icon="📦", layout="wide")
 
-    config_fuel = load_ui_configuration()
-    items_db = config_fuel.get("items_registry", {})
+# Warna korporat
+st.markdown("""
+    <style>
+    .stApp { background-color: #F4F4F6; }
+    .stButton > button {
+        background-color: #1F4E79;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-    # --- ELEMEN INPUT ANTARMUKA (tanpa ikon) ---
-    st_title = ft.Text("📦 Terminal Transaksi Stok Barang", size=24, weight=ft.FontWeight.BOLD, color="#1F4E79")
-    st_caption = ft.Text("Auto-Lookup Registry Engine Operational", size=12, italic=True)
-    
-    category_dropdown = ft.Dropdown(
-        label="Klasifikasi Kategori Barang",
-        options=[ft.dropdown.Option(cat) for cat in config_fuel["categories"]]
+config = load_ui_configuration()
+items_db = config.get("items_registry", {})
+
+st.title("📦 Terminal Transaksi Stok Barang")
+st.caption("Auto-Lookup Registry Engine Operational | Remote Device Sync Enabled")
+
+# --- FORMULIR INPUT ---
+serial_number = st.text_input("Nomor Seri / Serial Number (Scan Barcode)", placeholder="Scan kode komponen...")
+
+# Auto-lookup logic
+if serial_number:
+    search_key = serial_number.strip()
+    if search_key in items_db:
+        nama_barang = items_db[search_key]["name"]
+        kategori_barang = items_db[search_key]["category"]
+        st.success(f"🎯 Serial {search_key} teridentifikasi otomatis!")
+        nama_disabled = True
+        kategori_disabled = True
+    else:
+        nama_barang = ""
+        kategori_barang = None
+        nama_disabled = False
+        kategori_disabled = False
+else:
+    nama_barang = ""
+    kategori_barang = None
+    nama_disabled = False
+    kategori_disabled = False
+
+col1, col2 = st.columns(2)
+
+with col1:
+    nama_input = st.text_input("Nama Barang / Nomenclature Item", value=nama_barang, disabled=nama_disabled)
+    kategori_input = st.selectbox(
+        "Klasifikasi Kategori Barang",
+        config["categories"],
+        index=config["categories"].index(kategori_barang) if kategori_barang in config["categories"] else 0,
+        disabled=kategori_disabled
     )
-    type_dropdown = ft.Dropdown(
-        label="Jenis Protokol Transaksi",
-        options=[ft.dropdown.Option(t_type) for t_type in config_fuel["transaction_types"]]
-    )
-    operator_dropdown = ft.Dropdown(
-        label="Operator Penanggung Jawab",
-        options=[ft.dropdown.Option(op) for op in config_fuel["operators"]]
-    )
+    jumlah_input = st.number_input("Jumlah Unit / Quantity", min_value=1, value=1)
 
-    name_field = ft.TextField(label="Nama Barang / Nomenclature Item")
-    qty_field = ft.TextField(label="Jumlah Unit / Quantity", value="1")
+with col2:
+    tipe_transaksi = st.selectbox("Jenis Protokol Transaksi", config["transaction_types"])
+    operator_input = st.selectbox("Operator Penanggung Jawab", config["operators"])
 
-    serial_field = ft.TextField(
-        label="Nomor Seri / Serial Number (Scan Barcode)",
-        hint_text="Scan kode komponen...",
-    )
-
-    # --- INTELLIGENT AUTO-LOOKUP LOGIC ---
-    def check_barcode_registry(e):
-        search_key = serial_field.value.strip()
-        if search_key in items_db:
-            name_field.value = items_db[search_key]["name"]
-            category_dropdown.value = items_db[search_key]["category"]
-            name_field.disabled = True
-            category_dropdown.disabled = True
-            page.snack_bar = ft.SnackBar(
-                ft.Text(f"🎯 Serial {search_key} Teridentifikasi Otomatis!"),
-                background_color="#008080"
-            )
-            page.snack_bar.open = True
-        else:
-            name_field.value = ""
-            category_dropdown.value = None
-            name_field.disabled = False
-            category_dropdown.disabled = False
-        page.update()
-
-    serial_field.on_change = check_barcode_registry
-
-    # --- TRANSMIT ACTION MATRIX ---
-    def transmit_form_payload(e):
-        if not serial_field.value or not name_field.value or not category_dropdown.value or not type_dropdown.value or not operator_dropdown.value:
-            page.snack_bar = ft.SnackBar(
-                ft.Text("⚠️ Gagal: Seluruh kolom data wajib dilengkapi!"),
-                background_color="#D11A5B"
-            )
-            page.snack_bar.open = True
-            page.update()
-            return
-
+# --- TOMBOL KIRIM ---
+if st.button("Kirim Data Transaksi ke Google Sheets", use_container_width=True):
+    if not serial_number or not nama_input or not kategori_input or not tipe_transaksi or not operator_input:
+        st.error("⚠️ Gagal: Seluruh kolom data wajib dilengkapi!")
+    else:
         transaction_packet = {
-            "serial_number": str(serial_field.value).strip().upper(),
-            "item_name": str(name_field.value).strip(),
-            "category": str(category_dropdown.value),
-            "transaction_type": str(type_dropdown.value),
-            "quantity": int(qty_field.value),
-            "operator": str(operator_dropdown.value)
+            "serial_number": str(serial_number).strip().upper(),
+            "item_name": str(nama_input).strip(),
+            "category": str(kategori_input),
+            "transaction_type": str(tipe_transaksi),
+            "quantity": int(jumlah_input),
+            "operator": str(operator_input)
         }
 
-        # Reset form
-        serial_field.value = ""
-        name_field.value = ""
-        qty_field.value = "1"
-        name_field.disabled = False
-        category_dropdown.disabled = False
-        page.update()
-
         try:
-            sync_response = requests.post(WEBHOOK_URL, json=transaction_packet, timeout=6.0)
-            if sync_response.status_code == 200 and sync_response.json().get("status") == "SUCCESS":
-                page.snack_bar = ft.SnackBar(
-                    ft.Text("⚡ Sinkronisasi Sukses! Cloud Ledger Diperbarui."),
-                    background_color="#008080"
-                )
+            resp = requests.post(WEBHOOK_URL, json=transaction_packet, timeout=6.0)
+            if resp.status_code == 200 and resp.json().get("status") == "SUCCESS":
+                st.success("⚡ Sinkronisasi Sukses! Cloud Ledger Diperbarui.")
+                st.balloons()
             else:
-                page.snack_bar = ft.SnackBar(
-                    ft.Text("❌ Data Gagal Terkirim ke Cloud Server."),
-                    background_color="#D11A5B"
-                )
-        except Exception as error_fault:
-            page.snack_bar = ft.SnackBar(
-                ft.Text(f"🛑 Gangguan Jaringan: {str(error_fault)}"),
-                background_color="#D11A5B"
-            )
+                st.error(f"❌ Data Gagal Terkirim: {resp.json().get('message')}")
+        except Exception as err:
+            st.error(f"🛑 Gangguan Jaringan: {str(err)}")
 
-        page.snack_bar.open = True
-        page.update()
-
-    submit_action_btn = ft.ElevatedButton(
-        text="Kirim Data Transaksi ke Google Sheets",
-        style=ft.ButtonStyle(
-            color=ft.Colors.WHITE,
-            bgcolor="#1F4E79",
-            shape=ft.RoundedRectangleBorder(radius=6)
-        ),
-        on_click=transmit_form_payload
-    )
-
-    # --- TATA LETAK ---
-    page.add(
-        ft.Container(
-            content=ft.Column([
-                st_title,
-                st_caption,
-                ft.Divider(color="#1F4E79", thickness=1.5),
-                serial_field,
-                name_field,
-                ft.Row([category_dropdown, type_dropdown], alignment=ft.MainAxisAlignment.START),
-                ft.Row([qty_field, operator_dropdown], alignment=ft.MainAxisAlignment.START),
-                ft.VerticalDivider(height=10),
-                submit_action_btn
-            ], spacing=15),
-            padding=20,
-            bgcolor="#F4F4F6",
-            border_radius=10,
-            border=ft.border.all(1, "#1F4E79")
-        )
-    )
-
-if __name__ == "__main__":
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER)
+# --- FOOTER ---
+st.divider()
+st.caption("Flet Inventory Engine v1.0 · Powered by Streamlit · Webhook ke Google Sheets")
