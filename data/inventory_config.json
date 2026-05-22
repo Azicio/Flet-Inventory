@@ -13,10 +13,24 @@
         "PENYESUAIAN_AUDIT (Opname Stok)"
     ],
     "operators": [
-        "Azicio (Developer)",
+        "Azicio (Lead Operator)",
         "Father (Welder)",
-        "Kaka Rino (Operator Crusher)",
+        "Kaka Rino (Operator Excavator)",
         "Pak Bahar (Kepala Peralatan)",
         "Tim Auditor Manajemen"
-    ]
+    ],
+    "items_registry": {
+        "88133": {
+            "name": "Hydraulic Main Pump Pressure Gauge",
+            "category": "Depot Alat & Perkakas (Tools Depot)"
+        },
+        "88134": {
+            "name": "Heavy Duty Bucket Tooth Pin PC210",
+            "category": "Suku Cadang Alat Berat (Heavy Machinery Parts)"
+        },
+        "88155": {
+            "name": "Premium Engine Oil SAE 15W-40",
+            "category": "Cairan & Pelumas (Lubricants & Fluids)"
+        }
+    }
 }
